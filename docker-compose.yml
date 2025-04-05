@@ -1,0 +1,29 @@
+version: '3.8'  # Specifies the version of the Docker Compose file format
+
+services:
+  web:
+    image: myapp:latest  # Use the 'myapp:latest' image that we built earlier
+    ports:
+      - "3000:3000"  # Expose port 3000 on the host and map it to port 3000 in the container
+    restart: on-failure  # Restart the container only if it fails (not for other exit codes like 0)
+    
+    # Healthcheck to ensure the web service is healthy
+    healthcheck:
+      # 'wget' is used to perform an HTTP GET request to check if the service is responsive
+      test: ["CMD", "wget", "--spider", "http://localhost:3000"]  
+      interval: 30s  # Check health every 30 seconds
+      timeout: 10s   # If the check takes longer than 10 seconds, consider it a failure
+      retries: 3     # Retry 3 times before marking the container as unhealthy
+      start_period: 10s  # Give the container 10 seconds after startup to be ready before healthcheck starts
+
+    environment:
+      - NODE_ENV=production  # Set the environment to production (to optimize app behavior)
+    
+    # Optional: Mount a volume for persistent storage, like logs or data
+    volumes:
+      - ./logs:/app/logs  # Mount a host directory to store logs from the container (optional)
+    
+    # Optional: Set resource limits to prevent overconsumption of system resources
+    deploy:
+      resources:
+        limits
